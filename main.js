@@ -81,14 +81,49 @@
     IMG[n] = im;
   });
   function imgReady(n) { return IMG[n] && IMG[n].complete && IMG[n].naturalWidth > 0; }
+  var GLOW = {}, GLOW_PAD = 10;
   function makeDark(n) {
     if (/^room|rabbit|bear|fox|basket|shelf/.test(n)) return;
-    var im = IMG[n]; var c = document.createElement('canvas');
-    c.width = im.naturalWidth; c.height = im.naturalHeight;
+    var im = IMG[n], w = im.naturalWidth, h = im.naturalHeight;
+    // blocked version: darker + desaturated (pixel pass once, cached)
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
     var g = c.getContext('2d'); g.drawImage(im, 0, 0);
-    g.globalCompositeOperation = 'source-atop';
-    g.fillStyle = 'rgba(45,28,18,0.48)'; g.fillRect(0, 0, c.width, c.height);
+    try {
+      var d = g.getImageData(0, 0, w, h), a = d.data;
+      for (var i = 0; i < a.length; i += 4) {
+        var r = a[i], gg = a[i + 1], b = a[i + 2], y = 0.3 * r + 0.59 * gg + 0.11 * b;
+        a[i] = (y + (r - y) * 0.4) * 0.55 + 6;
+        a[i + 1] = (y + (gg - y) * 0.4) * 0.55 + 2;
+        a[i + 2] = (y + (b - y) * 0.4) * 0.55;
+      }
+      g.putImageData(d, 0, 0);
+    } catch (e) {
+      g.globalCompositeOperation = 'source-atop';
+      g.fillStyle = 'rgba(45,32,24,0.6)'; g.fillRect(0, 0, w, h);
+    }
     DARK[n] = c;
+    // tappable version: soft cream outline glow baked around the sprite
+    var sil = document.createElement('canvas'); sil.width = w; sil.height = h;
+    var sg = sil.getContext('2d'); sg.drawImage(im, 0, 0);
+    sg.globalCompositeOperation = 'source-in'; sg.fillStyle = '#fff7e2'; sg.fillRect(0, 0, w, h);
+    var o = document.createElement('canvas'), P = GLOW_PAD;
+    o.width = w + P * 2; o.height = h + P * 2;
+    var og = o.getContext('2d'), k;
+    og.globalAlpha = 0.22;
+    for (k = 0; k < 16; k++) og.drawImage(sil, P + Math.cos(k * Math.PI / 8) * 9, P + Math.sin(k * Math.PI / 8) * 9);
+    og.globalAlpha = 0.9;
+    for (k = 0; k < 16; k++) og.drawImage(sil, P + Math.cos(k * Math.PI / 8) * 4.5, P + Math.sin(k * Math.PI / 8) * 4.5);
+    og.globalAlpha = 1; og.drawImage(im, P, P);
+    GLOW[n] = o;
+  }
+  function drawGlow(name, x, y, size, rot, alpha) {
+    var o = GLOW[name]; if (!o) { drawSprite(name, x, y, size, rot, false, alpha); return; }
+    var im = IMG[name], s = size / Math.max(im.naturalWidth, im.naturalHeight);
+    ctx.save(); if (alpha != null) ctx.globalAlpha *= alpha;
+    ctx.translate(x, y); if (rot) ctx.rotate(rot);
+    ctx.drawImage(o, -o.width * s / 2, -o.height * s / 2, o.width * s, o.height * s);
+    ctx.restore();
   }
 
   // ---------- xhs bridge (feature detected) ----------
@@ -324,6 +359,7 @@
     S.baskets = [null, null]; S.shelf = []; S.flights = []; S.fx = [];
     S.score = 0; S.combo = 0; S.lastDone = -99; S.time = 0; S.toolUsed = false; S.failedThisLevel = S.failedThisLevel && S.retrying;
     S.retrying = false; S.overlay = null; S.endingT = -1; S.card = null; S.result = null;
+    S.items.forEach(function (it) { it.cov = isCovered(it); it.uncoverT = 0; });
     for (var b = 0; b < 2; b++) nextBasket(b, true);
     S.screen = 'play'; S.startT = 0;
     S.beforeCanvas = renderBefore();
@@ -346,7 +382,7 @@
   // ---------- actions ----------
   function tapItem(it) {
     if (!it || it.state !== 'room') return false;
-    if (isCovered(it)) { it.shake = 0.35; sfx.blocked(); hint('先拿上面的东西'); return false; }
+    if (isCovered(it)) { it.shake = 0.35; sfx.blocked(); hint('它被压住啦，先拿上面亮着的'); return false; }
     var target = -1, bestFill = -1;
     for (var b = 0; b < 2; b++) {
       var B = S.baskets[b];
@@ -398,7 +434,7 @@
       puff(f.to.x, f.to.y, '#fff3c8');
       if (B.filled.length >= 3) completeBasket(f.dest.bi);
     } else if (f.dest.type === 'room') {
-      it.state = 'room'; it.pop = 0.3;
+      it.state = 'room'; it.pop = 0.3; it.cov = isCovered(it);
     } else {
       it.state = 'shelf'; it.shelfX = f.to.x;
       sfx.shelf();
@@ -682,7 +718,14 @@
     if (S.screen !== 'play') return;
     if (S.overlay) { S.overlayT += dt; return; }
     if (S.endingT < 0 && !S.paused) S.time += dt;
-    S.items.forEach(function (it) { if (it.shake > 0) it.shake -= dt; if (it.pop > 0) it.pop -= dt; });
+    S.items.forEach(function (it) {
+      if (it.shake > 0) it.shake -= dt; if (it.pop > 0) it.pop -= dt;
+      if (it.uncoverT > 0) it.uncoverT -= dt;
+      if (it.state !== 'room') return;
+      var c = isCovered(it);
+      if (it.cov && !c) { it.uncoverT = 0.45; puff(it.x, it.y - it.size * 0.3, '#fff3c8'); }
+      it.cov = c;
+    });
     // flights
     var done = [];
     S.flights.forEach(function (f) {
@@ -790,19 +833,27 @@
     var g = ctx.createLinearGradient(0, PANEL_Y - 40, 0, PANEL_Y);
     g.addColorStop(0, 'rgba(40,25,15,0)'); g.addColorStop(1, 'rgba(40,25,15,0.35)');
     ctx.fillStyle = g; ctx.fillRect(0, PANEL_Y - 40, LW, 40);
-    // items
+    // items: blocked ones sit low, dark and grey; tappable ones glow, lift and breathe
     for (var i = 0; i < S.items.length; i++) {
       var it = S.items[i];
       if (it.state !== 'room') continue;
-      var cov = isCovered(it);
+      var cov = it.cov;
       var sx = it.shake > 0 ? Math.sin(it.shake * 60) * 4 : 0;
       var sc = it.pop > 0 ? 1 + it.pop * 0.5 : 1;
-      if (!cov) {
-        ctx.save(); ctx.globalAlpha = 0.22; ctx.fillStyle = '#2b1a0e';
-        ctx.beginPath(); ctx.ellipse ? ctx.ellipse(it.x + sx + 2, it.y + it.size * 0.36, it.size * 0.36, it.size * 0.1, 0, 0, 6.3) : ctx.arc(it.x, it.y + it.size * 0.36, it.size * 0.3, 0, 6.3);
-        ctx.fill(); ctx.restore();
+      if (cov) {
+        drawSprite(it.sprite, it.x + sx, it.y + 4, it.size * 0.9, it.rot, true);
+        continue;
       }
-      drawSprite(it.sprite, it.x + sx, it.y, it.size * sc, it.rot, cov);
+      var u = it.uncoverT > 0 ? it.uncoverT / 0.45 : 0; // 1 -> 0 while revealing
+      var ph = clock * 2.2 + it.id * 1.7;
+      var bob = Math.sin(ph) * 1.6, breathe = 1 + Math.sin(ph) * 0.018;
+      var size = it.size * lerp(1, 0.9, u) * sc * breathe * (1 + Math.sin((1 - u) * Math.PI) * (u > 0 ? 0.18 : 0));
+      var yy = it.y + lerp(-3, 4, u) + bob;
+      ctx.save(); ctx.globalAlpha = 0.28 * (1 - u); ctx.fillStyle = '#2b1a0e';
+      ctx.beginPath(); ctx.ellipse(it.x + sx + 2, it.y + it.size * 0.4, it.size * 0.36 * (1 - bob / 30), it.size * 0.1, 0, 0, 6.3);
+      ctx.fill(); ctx.restore();
+      if (u > 0) drawSprite(it.sprite, it.x + sx, yy, size, it.rot, true, u);
+      drawGlow(it.sprite, it.x + sx, yy, size, it.rot, 1 - u * 0.85);
     }
   }
   function drawBaskets() {
