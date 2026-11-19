@@ -4,8 +4,9 @@
   // ---------- constants ----------
   var LW = 390, LH = 844;
   var MAX_LIVES = 3, SHELF_N = 5;
-  var ROOM_Y = 56, ROOM_H = 520;
-  var PANEL_Y = ROOM_Y + ROOM_H; // 576
+  function slots() { return LEVELS[S.level].slots || 5; }
+  var ROOM_Y = 0, ROOM_H = 520;
+  var PANEL_Y = 604;
   var FONT = '"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC",sans-serif';
   var C = {
     wood: '#7a5134', woodDark: '#4a3020', woodLight: '#a8774f',
@@ -16,29 +17,33 @@
   };
   var CATS = {
     clothes: { name: '衣服', items: ['sweater', 'socks', 'tshirt', 'scarf', 'skirt'] },
-    soft: { name: '毛绒软物', items: ['pillow', 'blanket', 'pompom', 'heart'] },
+    soft: { name: '毛绒软物', items: ['pillow', 'blanket', 'pompom', 'heart', 'towel'] },
     snack: { name: '零食', items: ['cookies', 'candy', 'apple', 'choco', 'chips'] },
     stat: { name: '文具', items: ['pencil', 'notebook', 'scissors', 'tape', 'pencup'] },
     book: { name: '书本', items: ['redbook', 'bookstack', 'openbook', 'bluebook'] },
     shoes: { name: '鞋子', items: ['sneaker', 'slippers', 'boot', 'rainboot'] },
     acc: { name: '小饰品', items: ['comb', 'perfume', 'watch', 'sunglasses', 'necklace'] },
-    pink: { name: '只要粉色', items: ['bow', 'pinkmug', 'scrunchie', 'pinkmirror'] }
+    pink: { name: '只要粉色', items: ['bow', 'pinkmug', 'scrunchie', 'pinkmirror', 'pinkheart'] }
   };
   var LEVELS = [
-    { name: '兔兔的卧室', owner: 'rabbit', ownerName: '兔兔', room: 'room1', cats: ['clothes', 'soft', 'snack', 'stat'], baskets: 8, layers: 2, size: 76, target: 100 },
-    { name: '熊熊的书房', owner: 'bear', ownerName: '熊熊', room: 'room2', cats: ['stat', 'book', 'snack', 'soft', 'clothes'], baskets: 10, layers: 3, size: 70, target: 140 },
-    { name: '狐狸的衣帽间', owner: 'fox', ownerName: '狐狸', room: 'room3', cats: ['clothes', 'shoes', 'acc', 'pink', 'snack', 'soft'], baskets: 12, layers: 3, size: 66, target: 180 }
+    { name: '兔兔的卧室', owner: 'rabbit', ownerName: '兔兔', room: 'room1', cats: ['clothes', 'soft', 'snack', 'stat'], baskets: 14, layers: 3, size: 62, slots: 5, limit: 135, boxes: 2, quilts: 0,
+      bulbs: [[36,22],[55,23],[79,28],[100,22],[113,7],[134,11],[154,20],[175,23],[197,21],[221,11],[242,8],[262,19],[283,24],[303,23],[321,19],[340,8]], rayDx: 0, lamp: [118, 158, 'rgba(255,214,140,0.35)'] },
+    { name: '熊熊的书房', owner: 'bear', ownerName: '熊熊', room: 'room2', cats: ['stat', 'book', 'snack', 'soft', 'clothes'], baskets: 16, layers: 4, size: 60, slots: 4, limit: 148, boxes: 2, quilts: 1,
+      bulbs: [[17,32],[35,27],[49,18],[58,9],[71,19],[93,25],[112,21],[128,9],[141,11],[160,18],[178,20],[196,19],[219,11],[239,7],[257,17],[274,21],[291,21],[308,17],[327,8],[343,18],[360,26],[379,28]], rayDx: 40, lamp: [139, 182, 'rgba(200,255,170,0.30)'] },
+    { name: '狐狸的衣帽间', owner: 'fox', ownerName: '狐狸', room: 'room3', cats: ['clothes', 'shoes', 'acc', 'pink', 'snack', 'soft'], baskets: 20, layers: 4, size: 56, slots: 4, limit: 162, boxes: 3, quilts: 2,
+      bulbs: [[21,31],[38,27],[51,14],[60,5],[75,16],[94,23],[115,19],[130,7],[150,11],[167,19],[186,22],[205,19],[225,11],[245,8],[262,18],[281,22],[299,22],[313,17],[330,7],[345,20],[360,30],[377,34]], rayDx: null, lamp: [349, 140, 'rgba(255,190,200,0.38)'] }
   ];
   var LEVEL_TITLES = ['乱室佳人', '收纳新手', '整理达人'];
   var FINAL_TITLES = ['收纳新手', '整理达人', '断舍离大师', '小窝顶流收纳师'];
-  var PILE = { x0: 34, x1: 356, y0: ROOM_Y + 118, y1: ROOM_Y + 500 };
-  var BASKETS = [{ x: 18, y: 604, w: 170, h: 84 }, { x: 202, y: 604, w: 170, h: 84 }];
+  var PILE = { x0: 26, x1: 364, y0: 168, y1: 584 };
+  var BASKETS = [{ x: 12, y: 630, w: 114, h: 60 }, { x: 138, y: 630, w: 114, h: 60 }, { x: 264, y: 630, w: 114, h: 60 }];
   var SHELF_Y = 752, SLOT_W = 68, SLOT_X0 = (LW - SHELF_N * SLOT_W) / 2;
+  var CUBBY_X = [52, 123, 193, 264, 337], CUBBY_Y = 742;
   var UI = {
-    tool: { x: 18, y: 784, w: 168, h: 46 },
-    info: { x: 204, y: 784, w: 168, h: 46 },
-    mute: { x: 342, y: 10, w: 38, h: 36 },
-    home: { x: 10, y: 10, w: 38, h: 36 },
+    tool: { x: 16, y: 796, w: 150, h: 42 },
+    info: { x: 196, y: 798, w: 178, h: 38 },
+    mute: { x: 340, y: 12, w: 38, h: 38 },
+    home: { x: 12, y: 12, w: 38, h: 38 },
     start: { x: 95, y: 690, w: 200, h: 58 },
     startMute: { x: 338, y: 16, w: 40, h: 40 },
     ovBtn: { x: 105, y: 470, w: 180, h: 54 },
@@ -270,14 +275,15 @@
 
   // ---------- state ----------
   var S = {
-    screen: 'loading', level: 0, lives: MAX_LIVES, items: [], queue: [], baskets: [null, null],
+    screen: 'loading', level: 0, lives: MAX_LIVES, items: [], queue: [], baskets: [null, null, null],
     shelf: [], flights: [], fx: [], score: 0, combo: 0, lastDone: -99, time: 0,
     toolUsed: false, failedThisLevel: false, overlay: null, overlayT: 0, toast: '', toastT: 0,
     btnPress: {}, beforeCanvas: null, card: null, result: null, resultT: 0, startT: 0, endingT: -1, paused: false
   };
-  var PROG = { best: [0, 0, 0], bestScore: [0, 0, 0], unlocked: 1 };
+  var TOOL_KEYS = ['broom', 'magnet', 'shuffle', 'undo'], TOOL_NAMES = { broom: '整理', magnet: '磁铁', shuffle: '洗牌', undo: '撤回' };
+  var PROG = { best: [0, 0, 0], bestScore: [0, 0, 0], unlocked: 1, tools: { broom: 1, magnet: 0, shuffle: 0, undo: 1 }, gifts: 0 };
   getLocalData('tidy_progress').then(function (p) {
-    if (p && p.best && p.best.length === 3) { PROG = p; if (!PROG.bestScore) PROG.bestScore = [0, 0, 0]; }
+    if (p && p.best && p.best.length === 3) { PROG = p; if (!PROG.bestScore) PROG.bestScore = [0, 0, 0]; if (!PROG.tools) PROG.tools = { broom: 1, magnet: 0, shuffle: 0, undo: 1 }; if (!PROG.gifts) PROG.gifts = 0; }
   });
   getLocalData('tidy_muted').then(function (m) { if (m && m.muted) muted = true; });
   function saveProg() { setLocalData('tidy_progress', PROG); }
@@ -296,7 +302,7 @@
     for (var tries = 0; tries < 60; tries++) {
       shuffle(q);
       var ok = true;
-      for (var i = 1; i < q.length; i++) if (q[i] === q[i - 1]) { ok = false; break; }
+      for (var i = 1; i < q.length; i++) if (q[i] === q[i - 1] || (i > 1 && q[i] === q[i - 2])) { ok = false; break; }
       if (ok) break;
     }
     // level 3: keep the pink basket out of the first two
@@ -322,7 +328,7 @@
     var items = [];
     for (var l = 0; l < layers; l++) {
       var group = list.filter(function (it) { return it.layer === l; });
-      var pts = [], md = 74;
+      var pts = [], md = L.size * 1.15;
       group.forEach(function (it) {
         var best = null, bestD = -1;
         for (var t = 0; t < 120; t++) {
@@ -340,6 +346,15 @@
       });
     }
     items.sort(function (a, b) { return a.layer - b.layer; });
+    // sealed boxes: mid layers, need 2 taps (1st tap opens, no slot used)
+    var mids = shuffle(items.filter(function (it) { return it.layer > 0 && it.layer < layers - 1 || (layers === 2 && it.layer === 0); }));
+    for (var bx = 0; bx < (L.boxes || 0) && bx < mids.length; bx++) { mids[bx].box = true; mids[bx].inner = mids[bx].sprite; mids[bx].sprite = 'box'; }
+    // quilts: a top-layer soft item becomes a big quilt hiding what is under it
+    var softs = shuffle(items.filter(function (it) { return it.layer === layers - 1 && it.cat === 'soft' && !it.box; }));
+    for (var qi = 0; qi < (L.quilts || 0) && qi < softs.length; qi++) {
+      var qq = softs[qi]; qq.sprite = 'quilt'; qq.size = 100; qq.cover = true;
+      items.forEach(function (o) { if (o.layer < qq.layer) { var dx = o.x - qq.x, dy = o.y - qq.y; if (Math.sqrt(dx * dx + dy * dy) < 50) o.hiddenBy = qq; } });
+    }
     return { queue: q, items: items };
   }
   function isCovered(it) {
@@ -354,13 +369,15 @@
   function freeItems() { return S.items.filter(function (it) { return it.state === 'room' && !isCovered(it); }); }
 
   function startLevel(li) {
-    var g = buildLevel(li);
+    var g = buildLevel(li), tries = 1;
+    while (!simulate(li, g).ok && tries < 40) { g = buildLevel(li); tries++; }
+    S.genTries = tries;
     S.level = li; S.items = g.items; S.queue = g.queue.slice(); S.totalBaskets = g.queue.length;
-    S.baskets = [null, null]; S.shelf = []; S.flights = []; S.fx = [];
-    S.score = 0; S.combo = 0; S.lastDone = -99; S.time = 0; S.toolUsed = false; S.failedThisLevel = S.failedThisLevel && S.retrying;
+    S.baskets = [null, null, null]; S.shelf = []; S.flights = []; S.fx = [];
+    S.score = 0; S.combo = 0; S.comboBonus = 0; S.lastSort = -99; S.lastDone = -99; S.time = 0; S.toolUsed = false; S.failedThisLevel = S.failedThisLevel && S.retrying;
     S.retrying = false; S.overlay = null; S.endingT = -1; S.card = null; S.result = null;
     S.items.forEach(function (it) { it.cov = isCovered(it); it.uncoverT = 0; });
-    for (var b = 0; b < 2; b++) nextBasket(b, true);
+    for (var b = 0; b < 3; b++) nextBasket(b, true);
     S.screen = 'play'; S.startT = 0;
     S.beforeCanvas = renderBefore();
     sfx.start();
@@ -368,23 +385,79 @@
   }
   function nextBasket(bi, instant) {
     if (!S.queue.length) { S.baskets[bi] = null; return; }
-    var cat = S.queue.shift();
+    var qi = 0;
+    for (var j = 0; j < S.queue.length; j++) {
+      var dup = false; for (var o = 0; o < 3; o++) if (o !== bi && S.baskets[o] && S.baskets[o].cat === S.queue[j]) dup = true;
+      if (!dup) { qi = j; break; }
+    }
+    var cat = S.queue.splice(qi, 1)[0];
     S.baskets[bi] = { cat: cat, filled: [], incoming: 0, state: 'in', t: instant ? 1 : 0 };
     if (!instant) setTimeout(function () { pullFromShelf(bi); }, 380);
   }
   function basketAccepts(b, cat) { return b && b.state !== 'out' && b.cat === cat && b.filled.length + b.incoming < 3; }
 
+  // ---------- greedy solver (no tools): used to verify every generated room is clearable ----------
+  function simulate(li, g, noise) {
+    var L = LEVELS[li], N = L.slots;
+    var items = g.items.map(function (it) { return { cat: it.cat, layer: it.layer, x: it.x, y: it.y, size: it.size, box: !!it.box, st: 'room' }; });
+    var queue = g.queue.slice(), baskets = [null, null, null], shelf = [], taps = 0, maxShelf = 0, done = 0;
+    function cov(it) {
+      for (var i = 0; i < items.length; i++) { var o = items[i]; if (o === it || o.st !== 'room' || o.layer <= it.layer) continue;
+        var dx = o.x - it.x, dy = o.y - it.y; if (Math.sqrt(dx * dx + dy * dy) < (o.size + it.size) * 0.38) return true; }
+      return false;
+    }
+    function next(bi) {
+      var qi = -1;
+      for (var j = 0; j < queue.length; j++) { var dup = false; for (var o = 0; o < 3; o++) if (o !== bi && baskets[o] && baskets[o].cat === queue[j]) dup = true; if (!dup) { qi = j; break; } }
+      if (qi < 0 && queue.length) qi = 0;
+      baskets[bi] = qi < 0 ? null : { cat: queue.splice(qi, 1)[0], n: 0 };
+      if (baskets[bi]) for (var s2 = 0; s2 < shelf.length; s2++) if (shelf[s2].cat === baskets[bi].cat && baskets[bi].n < 3) { put(bi, shelf[s2]); shelf.splice(s2, 1); s2--; }
+    }
+    function put(bi, it) { it.st = 'basket'; baskets[bi].n++; if (baskets[bi].n >= 3) { done++; next(bi); } }
+    function uncovers(it) { var c = 0; for (var i = 0; i < items.length; i++) { var o = items[i]; if (o.st === 'room' && o.layer < it.layer) { var dx = o.x - it.x, dy = o.y - it.y; if (Math.sqrt(dx * dx + dy * dy) < (o.size + it.size) * 0.38) c++; } } return c; }
+    for (var b = 0; b < 3; b++) next(b);
+    for (var guard = 0; guard < 500; guard++) {
+      var free = items.filter(function (it) { return it.st === 'room' && !cov(it); });
+      if (!free.length) break;
+      var best = null, bestScore = -1, bi = -1;
+      free.forEach(function (it) { if (it.box) return; for (var k = 0; k < 3; k++) if (baskets[k] && baskets[k].cat === it.cat) { var sc = baskets[k].n * 10 + uncovers(it); if (sc > bestScore) { bestScore = sc; best = it; bi = k; } } });
+      taps++;
+      if (noise && Math.random() < noise) { // casual mis-tap: grab a random free item
+        var rnd = free[Math.floor(Math.random() * free.length)], hit = -1;
+        if (rnd.box) { rnd.box = false; continue; }
+        for (var k2 = 0; k2 < 3; k2++) if (baskets[k2] && baskets[k2].cat === rnd.cat) hit = k2;
+        if (hit >= 0) { put(hit, rnd); continue; }
+        if (shelf.length >= N) return { ok: false, taps: taps, maxShelf: maxShelf };
+        rnd.st = 'shelf'; shelf.push(rnd); maxShelf = Math.max(maxShelf, shelf.length);
+        if (shelf.length >= N) return { ok: false, taps: taps, maxShelf: maxShelf };
+        continue;
+      }
+      if (best) { put(bi, best); continue; }
+      var bx = free.filter(function (it) { return it.box; })[0];
+      if (bx) { bx.box = false; continue; }
+      // to shelf: category needed soonest, then most uncovering
+      var pickIt = null, pickScore = -1e9;
+      free.forEach(function (it) { var qpos = queue.indexOf(it.cat); var sc = (qpos < 0 ? -100 : -qpos * 5) + uncovers(it) * 3; if (sc > pickScore) { pickScore = sc; pickIt = it; } });
+      if (shelf.length >= N) return { ok: false, taps: taps, maxShelf: maxShelf };
+      pickIt.st = 'shelf'; shelf.push(pickIt); maxShelf = Math.max(maxShelf, shelf.length);
+      if (shelf.length >= N) return { ok: false, taps: taps, maxShelf: maxShelf };
+    }
+    var ok = items.every(function (it) { return it.st === 'basket'; });
+    return { ok: ok, taps: taps, maxShelf: maxShelf };
+  }
+
   // ---------- geometry ----------
   function basketCenter(bi) { var B = BASKETS[bi]; return { x: B.x + B.w / 2, y: B.y + B.h / 2 }; }
-  function basketSlot(bi, k) { var B = BASKETS[bi]; return { x: B.x + B.w / 2 + (k - 1) * 44, y: B.y + 14 }; }
-  function shelfSlot(i) { return { x: SLOT_X0 + SLOT_W * i + SLOT_W / 2, y: SHELF_Y - 26 }; }
+  function basketSlot(bi, k) { var B = BASKETS[bi]; return { x: B.x + B.w / 2 + (k - 1) * 30, y: B.y + 8 }; }
+  function shelfSlot(i) { return { x: CUBBY_X[i], y: CUBBY_Y }; }
 
   // ---------- actions ----------
   function tapItem(it) {
     if (!it || it.state !== 'room') return false;
-    if (isCovered(it)) { it.shake = 0.35; sfx.blocked(); hint('它被压住啦，先拿上面亮着的'); return false; }
+    if (!it.magnet && isCovered(it)) { it.shake = 0.35; sfx.blocked(); hint('它被压住啦，先拿上面亮着的'); return false; }
+    if (it.box) { it.box = false; it.sprite = it.inner; it.pop = 0.35; sfx.tap(); puff(it.x, it.y, '#e7c48d'); hint('拆开啦，再点一下收走'); return true; }
     var target = -1, bestFill = -1;
-    for (var b = 0; b < 2; b++) {
+    for (var b = 0; b < 3; b++) {
       var B = S.baskets[b];
       if (basketAccepts(B, it.cat) && B.state === 'idle' || (basketAccepts(B, it.cat) && B.state === 'in')) {
         var f = B.filled.length + B.incoming;
@@ -396,10 +469,10 @@
       var Bk = S.baskets[target], k = Bk.filled.length + Bk.incoming;
       Bk.incoming++;
       it.state = 'fly';
-      launch(it, { x: it.x, y: it.y, rot: it.rot, size: it.size }, basketSlot(target, k), 44, { type: 'basket', bi: target });
+      launch(it, { x: it.x, y: it.y, rot: it.rot, size: it.size }, basketSlot(target, k), 36, { type: 'basket', bi: target });
     } else {
       var used = S.shelf.length;
-      if (used >= SHELF_N) return false;
+      if (used >= slots()) return false;
       it.state = 'fly';
       S.shelf.push(it);
       it.shelfX = null;
@@ -421,7 +494,7 @@
       S.shelf.splice(i, 1); i--;
       var p = shelfPos(it);
       it.state = 'fly';
-      launch(it, { x: p.x, y: p.y, rot: 0, size: 52 }, basketSlot(bi, k), 44, { type: 'basket', bi: bi });
+      launch(it, { x: p.x, y: p.y, rot: 0, size: 52 }, basketSlot(bi, k), 36, { type: 'basket', bi: bi });
     }
   }
   function shelfPos(it) { var i = S.shelf.indexOf(it); var s = shelfSlot(i < 0 ? 0 : i); return { x: it.shelfX != null ? it.shelfX : s.x, y: s.y }; }
@@ -430,6 +503,8 @@
     if (f.dest.type === 'basket') {
       var B = S.baskets[f.dest.bi];
       B.incoming--; B.filled.push(it); it.state = 'basket';
+      S.combo = (S.time - (S.lastSort || -99) < 3) ? S.combo + 1 : 1; S.lastSort = S.time;
+      if (S.combo >= 3) { S.comboShow = 2.2; if (S.combo % 5 === 0 && (S.comboBonus || 0) < 10) { S.comboBonus = (S.comboBonus || 0) + 2; S.time = Math.max(0, S.time - 2); S.fx.push({ kind: 'text', s: '+2秒', x: 272, y: 768, t: 0, life: 1 }); } }
       sfx.drop();
       puff(f.to.x, f.to.y, '#fff3c8');
       if (B.filled.length >= 3) completeBasket(f.dest.bi);
@@ -439,48 +514,69 @@
       it.state = 'shelf'; it.shelfX = f.to.x;
       sfx.shelf();
       checkShelfMatch();
-      if (S.shelf.length === SHELF_N - 1) hint('暂存架快满了，小心！');
+      if (S.shelf.length === slots() - 1) hint('暂存格只剩 1 格了！');
     }
   }
-  function checkShelfMatch() { for (var b = 0; b < 2; b++) if (S.baskets[b] && S.baskets[b].state === 'idle') pullFromShelf(b); }
+  function checkShelfMatch() { for (var b = 0; b < 3; b++) if (S.baskets[b] && S.baskets[b].state === 'idle') pullFromShelf(b); }
   function completeBasket(bi) {
     var B = S.baskets[bi];
     B.state = 'out'; B.t = 0;
-    S.combo = (S.time - S.lastDone < 7) ? S.combo + 1 : 1;
     S.lastDone = S.time;
-    var gain = 100 + 20 * (S.combo - 1);
+    var gain = S.combo >= 3 ? 150 : 100;
     S.score += gain;
     sfx.done(); vibrate('medium');
     var c = basketCenter(bi);
     for (var i = 0; i < 10; i++) S.fx.push({ kind: 'star', x: c.x + rand(-60, 60), y: c.y + rand(-30, 10), vx: rand(-30, 30), vy: rand(-90, -40), t: 0, life: rand(0.6, 1) });
-    S.fx.push({ kind: 'text', s: '+' + gain + (S.combo > 1 ? '  连收×' + S.combo : ''), x: c.x, y: c.y - 40, t: 0, life: 1.1 });
+    S.fx.push({ kind: 'text', s: '+' + gain, x: c.x, y: c.y - 40, t: 0, life: 1.1 });
   }
-  function useTool() {
-    if (S.toolUsed) { hint('每间房只能用一次哦'); sfx.blocked(); return; }
-    var onShelf = S.shelf.filter(function (s) { return s.state === 'shelf'; });
-    if (!onShelf.length) { hint('暂存架是空的，不用整理'); return; }
-    S.toolUsed = true; sfx.whoosh();
-    var back = onShelf.slice(-3);
-    var top = 0; S.items.forEach(function (o) { if (o.state === 'room') top = Math.max(top, o.layer); });
-    back.forEach(function (it, i) {
+  function topLayer() { var top = 0; S.items.forEach(function (o) { if (o.state === 'room') top = Math.max(top, o.layer); }); return top; }
+  function backToRoom(list) {
+    var top = topLayer();
+    list.forEach(function (it, i) {
       var p = shelfPos(it);
       S.shelf.splice(S.shelf.indexOf(it), 1);
-      it.layer = top + 1; it.state = 'fly'; it.rot = rand(-0.3, 0.3);
+      it.layer = top + 1; it.state = 'fly'; it.rot = rand(-0.3, 0.3); it.hiddenBy = null;
       it.x = PILE.x0 + 60 + i * 110 + rand(-15, 15); it.y = PILE.y0 + rand(30, 90);
       launch(it, { x: p.x, y: p.y, rot: 0, size: 52 }, { x: it.x, y: it.y }, it.size, { type: 'room' });
     });
-    // keep draw order by layer
     S.items.sort(function (a, b) { return a.layer - b.layer; });
-    hint('放回去 ' + back.length + ' 件，暂存架松快了');
   }
-  function failLevel() {
+  function useTool(k) {
+    if (!(PROG.tools[k] > 0)) { hint('通关拿星星可以换「' + TOOL_NAMES[k] + '」哦'); sfx.blocked(); return; }
+    var onShelf = S.shelf.filter(function (s) { return s.state === 'shelf'; });
+    if (k === 'broom' || k === 'undo') {
+      if (!onShelf.length) { hint('暂存格是空的，先不用'); return; }
+      var back = k === 'broom' ? onShelf.slice(-3) : onShelf.slice(-1);
+      backToRoom(back);
+      hint(k === 'broom' ? '放回去 ' + back.length + ' 件，暂存格松快了' : '撤回了刚放的那件');
+    } else if (k === 'magnet') {
+      var bi = -1, need = 0;
+      for (var b = 0; b < 3; b++) { var B = S.baskets[b]; if (B && B.state !== 'out') { var n = 3 - B.filled.length - B.incoming; if (n > need) { need = n; bi = b; } } }
+      if (bi < 0) { hint('篮子都快满了，等一下再用'); return; }
+      var cat = S.baskets[bi].cat, got = 0;
+      var cands = S.items.filter(function (o) { return o.state === 'room' && o.cat === cat; });
+      cands.sort(function (a, b) { return b.layer - a.layer; });
+      if (!cands.length) { hint('房间里没有这类东西了'); return; }
+      for (var c = 0; c < cands.length && got < need; c++) {
+        var it = cands[c]; if (it.box) { it.box = false; it.sprite = it.inner; }
+        it.magnet = true; if (tapItem(it)) got++; it.magnet = false;
+      }
+      hint('磁铁吸来了 ' + got + ' 件');
+    } else if (k === 'shuffle') {
+      var room = S.items.filter(function (o) { return o.state === 'room' && !o.cover; });
+      var pool = room.map(function (o) { return { cat: o.cat, sprite: o.sprite, box: o.box, inner: o.inner }; });
+      shuffle(pool);
+      room.forEach(function (o, i) { o.cat = pool[i].cat; o.sprite = pool[i].sprite; o.box = pool[i].box; o.inner = pool[i].inner; o.pop = 0.3; });
+      hint('房间翻了个面～');
+    }
+    PROG.tools[k]--; saveProg(); sfx.whoosh();
+  }
+  function failLevel(reason) {
     if (S.overlay) return;
-    S.lives--; S.failedThisLevel = true;
-    S.overlay = S.lives <= 0 ? 'over' : 'fail'; S.overlayT = 0;
+    S.overlay = reason || 'full'; S.overlayT = 0;
     sfx.fail(); vibrate('heavy');
   }
   function retryLevel() {
-    if (S.lives <= 0) S.lives = MAX_LIVES;
     S.retrying = true;
     startLevel(S.level);
   }
@@ -488,16 +584,19 @@
     if (S.endingT >= 0 || S.overlay) return;
     if (S.flights.length) return;
     for (var i = 0; i < S.items.length; i++) if (S.items[i].state !== 'basket') return;
-    if (S.baskets[0] || S.baskets[1]) return;
+    if (S.baskets[0] || S.baskets[1] || S.baskets[2]) return;
     S.endingT = 0;
     sfx.clear();
   }
   function finishLevel() {
     var L = LEVELS[S.level];
-    var stars = 1 + (S.failedThisLevel ? 0 : 1) + (S.time <= L.target ? 1 : 0);
-    var timeBonus = Math.max(0, Math.round((L.target - S.time) * 3));
-    var shelfBonus = (SHELF_N - S.shelf.length) * 30;
+    var left = L.limit - S.time;
+    var stars = 1 + (left >= L.limit * 0.25 ? 1 : 0) + (left >= L.limit * 0.45 ? 1 : 0);
+    var timeBonus = Math.max(0, Math.round(left * 5));
+    var shelfBonus = (slots() - S.shelf.length) * 30;
     S.score += timeBonus + shelfBonus;
+    var newStars = Math.max(0, stars - (PROG.best[S.level] || 0)), gift = [];
+    for (var gi = 0; gi < newStars; gi++) { var gk = ['undo', 'magnet', 'broom', 'shuffle'][PROG.gifts % 4]; PROG.gifts++; PROG.tools[gk] = (PROG.tools[gk] || 0) + 1; gift.push(TOOL_NAMES[gk]); }
     PROG.best[S.level] = Math.max(PROG.best[S.level] || 0, stars);
     PROG.bestScore[S.level] = Math.max(PROG.bestScore[S.level] || 0, S.score);
     PROG.unlocked = Math.max(PROG.unlocked, Math.min(3, S.level + 2));
@@ -508,7 +607,7 @@
       var tot = PROG.best[0] + PROG.best[1] + PROG.best[2];
       title = tot >= 9 ? FINAL_TITLES[3] : tot >= 8 ? FINAL_TITLES[2] : tot >= 6 ? FINAL_TITLES[1] : FINAL_TITLES[0];
     } else title = LEVEL_TITLES[stars - 1];
-    S.result = { level: S.level, stars: stars, time: S.time, score: S.score, title: title, final: final, timeBonus: timeBonus, shelfBonus: shelfBonus };
+    S.result = { level: S.level, stars: stars, time: S.time, score: S.score, title: title, final: final, timeBonus: timeBonus, shelfBonus: shelfBonus, gift: gift };
     try { S.card = renderCard(); } catch (e) { S.card = null; }
     S.screen = 'clear'; S.resultT = 0;
   }
@@ -518,7 +617,8 @@
     var k = 2, c = document.createElement('canvas');
     c.width = LW * k; c.height = ROOM_H * k;
     var g = c.getContext('2d'); g.scale(k, k);
-    drawCover(LEVELS[S.level].room, 0, 0, LW, ROOM_H, g);
+    var bgk = 'bg_' + LEVELS[S.level].room;
+    if (imgReady(bgk)) g.drawImage(IMG[bgk], 0, 0, LW, LH); else drawCover(LEVELS[S.level].room, 0, 0, LW, ROOM_H, g);
     S.items.forEach(function (it) { drawSprite(it.sprite, it.x, it.y - ROOM_Y, it.size, it.rot, false, 1, g); });
     return c;
   }
@@ -649,13 +749,13 @@
       if (hit(UI.startMute, x, y)) { press('startMute'); toggleMute(); return; }
       for (var i = 0; i < 3; i++) {
         if (hit(roomCardRect(i), x, y)) {
-          if (i < PROG.unlocked) { press('room' + i); S.lives = MAX_LIVES; S.failedThisLevel = false; startLevel(i); }
+          if (i < PROG.unlocked) { press('room' + i); startLevel(i); }
           else { sfx.blocked(); hint('先收拾好前一间哦'); }
           return;
         }
       }
       if (hit(UI.start, x, y)) {
-        press('start'); S.lives = MAX_LIVES; S.failedThisLevel = false;
+        press('start');
         var li = 0; while (li < 2 && PROG.best[li] > 0) li++;
         startLevel(li);
       }
@@ -666,7 +766,7 @@
       if (hit(UI.save, x, y)) { press('save'); sfx.tap(); saveCard(); return; }
       if (hit(UI.next, x, y)) {
         press('next'); sfx.tap();
-        if (S.result.final) { S.lives = MAX_LIVES; S.failedThisLevel = false; startLevel(0); }
+        if (S.result.final) { startLevel(0); }
         else { S.failedThisLevel = false; startLevel(S.result.level + 1); }
         return;
       }
@@ -683,7 +783,7 @@
     if (hit(UI.mute, x, y)) { press('mute'); toggleMute(); return; }
     if (hit(UI.home, x, y)) { press('home'); S.screen = 'start'; return; }
     if (S.endingT >= 0) return;
-    if (hit(UI.tool, x, y)) { press('tool'); useTool(); return; }
+    for (var ti = 0; ti < 4; ti++) { var tx = 36 + ti * 52; if ((x - tx) * (x - tx) + (y - 804) * (y - 804) < 26 * 26) { press('tool' + ti); useTool(TOOL_KEYS[ti]); return; } }
     if (y > ROOM_Y && y < PANEL_Y) {
       var it = itemAt(x, y);
       if (it) tapItem(it);
@@ -709,6 +809,7 @@
   function update(dt) {
     for (var k in S.btnPress) if (S.btnPress.hasOwnProperty(k)) S.btnPress[k] = Math.max(0, S.btnPress[k] - dt);
     if (S.toastT > 0) S.toastT -= dt;
+    if (S.comboShow > 0 && !S.freezeCombo) S.comboShow -= dt;
     S.fx = S.fx.filter(function (f) {
       f.t += dt;
       if (f.vx != null) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 120 * dt; }
@@ -743,7 +844,7 @@
       it.shelfX = it.shelfX == null ? tx : lerp(it.shelfX, tx, Math.min(1, dt * 12));
     });
     // baskets
-    for (var b = 0; b < 2; b++) {
+    for (var b = 0; b < 3; b++) {
       var B = S.baskets[b]; if (!B) continue;
       if (B.state === 'in') { B.t += dt / 0.35; if (B.t >= 1) { B.t = 1; B.state = 'idle'; pullFromShelf(b); } }
       else if (B.state === 'out') {
@@ -751,11 +852,12 @@
         if (B.t >= 1) { B.filled.forEach(function (it) { it.state = 'basket'; }); nextBasket(b, false); }
       }
     }
+    if (S.endingT < 0 && S.time >= (LEVELS[S.level].limit || 999)) { S.time = LEVELS[S.level].limit; failLevel('timeout'); return; }
     // shelf full -> fail (only once nothing can still free a slot)
     var settled = 0; S.shelf.forEach(function (it) { if (it.state === 'shelf') settled++; });
-    if (settled >= SHELF_N && !S.flights.length) {
+    if (settled >= slots() && !S.flights.length) {
       var moving = false;
-      for (var b2 = 0; b2 < 2; b2++) if (S.baskets[b2] && S.baskets[b2].state !== 'idle') moving = true;
+      for (var b2 = 0; b2 < 3; b2++) if (S.baskets[b2] && S.baskets[b2].state !== 'idle') moving = true;
       if (!moving) { checkShelfMatch(); if (!S.flights.length) failLevel(); }
     }
     if (S.endingT >= 0) { S.endingT += dt; if (S.endingT > 1.1) finishLevel(); }
@@ -781,6 +883,62 @@
     fitText(label, 0, 0, b.w - 20, sz || 18, '#fff', true);
     ctx.restore();
   }
+  function paper(x, y, w, h, r, tilt) {
+    ctx.save();
+    ctx.translate(x + w / 2, y + h / 2); if (tilt) ctx.rotate(tilt); ctx.translate(-w / 2, -h / 2);
+    ctx.shadowColor = 'rgba(50,28,12,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+    rr(0, 0, w, h, r); ctx.fillStyle = '#f6ead1'; ctx.fill();
+    ctx.shadowColor = 'transparent';
+    var g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(255,255,255,0.35)'); g.addColorStop(1, 'rgba(190,150,100,0.18)');
+    rr(0, 0, w, h, r); ctx.fillStyle = g; ctx.fill();
+    rr(2.5, 2.5, w - 5, h - 5, Math.max(1, r - 2)); ctx.setLineDash([3, 3]); ctx.strokeStyle = 'rgba(150,110,70,0.35)'; ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+    ctx.restore();
+  }
+  function sticker(x, y, kind, r) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(0.25);
+    ctx.shadowColor = 'rgba(60,30,10,0.3)'; ctx.shadowBlur = 2; ctx.shadowOffsetY = 1;
+    if (kind === 'heart') {
+      ctx.scale(r / 10, r / 10); ctx.beginPath(); ctx.moveTo(0, 7); ctx.bezierCurveTo(-13, -2, -9, -13, 0, -6); ctx.bezierCurveTo(9, -13, 13, -2, 0, 7); ctx.closePath();
+      ctx.fillStyle = '#fff'; ctx.fill(); ctx.shadowColor = 'transparent'; ctx.scale(0.72, 0.72); ctx.translate(0, -0.5);
+      ctx.beginPath(); ctx.moveTo(0, 7); ctx.bezierCurveTo(-13, -2, -9, -13, 0, -6); ctx.bezierCurveTo(9, -13, 13, -2, 0, 7); ctx.closePath(); ctx.fillStyle = '#ef8f95'; ctx.fill();
+    } else if (kind === 'star') {
+      drawStar(ctx, 0, 0, r * 1.25, '#fff'); ctx.shadowColor = 'transparent'; drawStar(ctx, 0, 0, r * 0.95, '#f2c14e');
+    } else {
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, r * 1.15, 0, 6.3); ctx.fill(); ctx.shadowColor = 'transparent';
+      for (var i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(Math.cos(i * 1.2566) * r * 0.5, Math.sin(i * 1.2566) * r * 0.5, r * 0.42, 0, 6.3); ctx.fillStyle = '#9cc7e6'; ctx.fill(); }
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.3, 0, 6.3); ctx.fillStyle = '#ffd56b'; ctx.fill();
+    }
+    ctx.restore();
+  }
+  function ribbon(cx, y, w, label) {
+    ctx.save();
+    var h = 30;
+    ctx.fillStyle = '#b4504a';
+    [-1, 1].forEach(function (sd) {
+      var ex = cx + sd * (w / 2 + 14);
+      ctx.beginPath(); ctx.moveTo(cx + sd * (w / 2 - 6), y + 8); ctx.lineTo(ex + sd * 10, y + 8); ctx.lineTo(ex, y + 8 + h / 2); ctx.lineTo(ex + sd * 10, y + 8 + h); ctx.lineTo(cx + sd * (w / 2 - 6), y + 8 + h); ctx.closePath(); ctx.fill();
+    });
+    ctx.fillStyle = '#7e3330';
+    [-1, 1].forEach(function (sd) { ctx.beginPath(); ctx.moveTo(cx + sd * (w / 2), y + h); ctx.lineTo(cx + sd * (w / 2 - 8), y + h + 8); ctx.lineTo(cx + sd * (w / 2 - 8), y + h); ctx.fill(); });
+    ctx.shadowColor = 'rgba(60,20,10,0.4)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+    var g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#e2766c'); g.addColorStop(1, '#c4574e');
+    rr(cx - w / 2, y, w, h, 4); ctx.fillStyle = g; ctx.fill(); ctx.shadowColor = 'transparent';
+    ctx.setLineDash([3, 3]); ctx.strokeStyle = 'rgba(255,235,220,0.7)'; ctx.lineWidth = 1; rr(cx - w / 2 + 4, y + 4, w - 8, h - 8, 2); ctx.stroke(); ctx.setLineDash([]);
+    text(label, cx, y + h / 2 + 1, 15, '#fff6ea', 'center', true);
+    ctx.restore();
+  }
+  function woodSign(x, y, w, h, disabled) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(40,20,8,0.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+    rr(x, y, w, h, 9); ctx.fillStyle = '#9a6a40'; ctx.fill(); ctx.shadowColor = 'transparent';
+    var g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#c08a55'); g.addColorStop(1, '#8a5a33');
+    rr(x + 2, y + 2, w - 4, h - 4, 7); ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(70,40,18,0.22)'; ctx.lineWidth = 1;
+    for (var i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(x + 8, y + h * i / 4 + Math.sin(i) * 2); ctx.bezierCurveTo(x + w * 0.35, y + h * i / 4 - 3, x + w * 0.65, y + h * i / 4 + 3, x + w - 8, y + h * i / 4); ctx.stroke(); }
+    ctx.fillStyle = '#5a3a1e'; [x + 9, x + w - 9].forEach(function (nx) { ctx.beginPath(); ctx.arc(nx, y + h / 2, 2.2, 0, 6.3); ctx.fill(); });
+    if (disabled) { rr(x, y, w, h, 9); ctx.fillStyle = 'rgba(60,40,25,0.35)'; ctx.fill(); }
+    ctx.restore();
+  }
   function drawHeart(x, y, r, full) {
     ctx.save(); ctx.translate(x, y); ctx.scale(r / 10, r / 10);
     ctx.beginPath();
@@ -796,28 +954,48 @@
     for (var yy = y + 26; yy < y + h; yy += 34) { ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(LW, yy); ctx.stroke(); }
   }
   function drawHUD() {
-    woodPanel(0, ROOM_Y);
     var L = LEVELS[S.level];
-    // home
     var hs = pressScale('home');
-    ctx.save(); ctx.translate(UI.home.x + 19, UI.home.y + 18); ctx.scale(hs, hs);
-    rr(-19, -18, 38, 36, 12); ctx.fillStyle = 'rgba(255,245,225,0.18)'; ctx.fill();
-    ctx.beginPath(); ctx.moveTo(-9, 0); ctx.lineTo(0, -8); ctx.lineTo(9, 0); ctx.moveTo(-6, -2); ctx.lineTo(-6, 8); ctx.lineTo(6, 8); ctx.lineTo(6, -2);
-    ctx.strokeStyle = C.cream; ctx.lineWidth = 2.2; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.save(); ctx.translate(UI.home.x + 19, UI.home.y + 19); ctx.scale(hs, hs);
+    paper(-19, -19, 38, 38, 19);
+    ctx.beginPath(); ctx.moveTo(-9, 1); ctx.lineTo(0, -8); ctx.lineTo(9, 1); ctx.moveTo(-6, -1); ctx.lineTo(-6, 8); ctx.lineTo(6, 8); ctx.lineTo(6, -1);
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 2.2; ctx.lineJoin = 'round'; ctx.stroke();
     ctx.restore();
-    for (var i = 0; i < MAX_LIVES; i++) drawHeart(66 + i * 22, 28, 9, i < S.lives);
-    text(L.name, LW / 2 + 8, 20, 16, C.cream, 'center', true);
-    var collected = S.items.filter(function (it) { return it.state === 'basket'; }).length;
-    var pw = 110, px = LW / 2 + 8 - pw / 2;
-    rr(px, 34, pw, 8, 4); ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fill();
-    rr(px, 34, Math.max(8, pw * collected / S.items.length), 8, 4); ctx.fillStyle = C.sageLight; ctx.fill();
-    text(collected + '/' + S.items.length, px + pw + 26, 38, 12, C.cream, 'center', true);
-    // mute
     var ms = pressScale('mute');
-    ctx.save(); ctx.translate(UI.mute.x + 19, UI.mute.y + 18); ctx.scale(ms, ms);
-    rr(-19, -18, 38, 36, 12); ctx.fillStyle = 'rgba(255,245,225,0.18)'; ctx.fill();
-    speaker(0, 0, muted);
-    ctx.restore();
+    ctx.save(); ctx.translate(UI.mute.x + 19, UI.mute.y + 19); ctx.scale(ms, ms);
+    paper(-19, -19, 38, 38, 19); speakerC(0, 0, muted, C.ink); ctx.restore();
+    // one paper tag: room name + progress (timer lives in the bottom panel)
+    paper(112, 8, 166, 46, 12, -0.012);
+    text(L.name, 195, 24, 15, C.ink, 'center', true);
+    var collected = S.items.filter(function (it) { return it.state === 'basket'; }).length;
+    var px = 128, pw = 104;
+    rr(px, 37, pw, 7, 3.5); ctx.fillStyle = 'rgba(120,85,55,0.25)'; ctx.fill();
+    rr(px, 37, Math.max(7, pw * collected / S.items.length), 7, 3.5); ctx.fillStyle = C.sage; ctx.fill();
+    text(collected + '/' + S.items.length, px + pw + 20, 41, 11, C.inkSoft, 'center', true);
+    // combo bubble
+    if (S.comboShow > 0 && S.combo > 1) {
+      var a = Math.min(1, S.comboShow / 0.3), bob = Math.sin(clock * 6) * 2;
+      ctx.save(); ctx.globalAlpha = a; ctx.translate(318, 92 + bob); ctx.rotate(0.06);
+      ctx.shadowColor = 'rgba(80,30,10,0.4)'; ctx.shadowBlur = 8;
+      rr(-56, -22, 112, 44, 22); var cg = ctx.createLinearGradient(0, -22, 0, 22); cg.addColorStop(0, '#ffd56b'); cg.addColorStop(1, '#f29a4a'); ctx.fillStyle = cg; ctx.fill();
+      ctx.shadowColor = 'transparent';
+      text('连收 ×' + S.combo, 0, -6, 17, '#7a2e10', 'center', true);
+      text('每连 5 次 +2 秒', 0, 12, 10.5, '#7a2e10', 'center', true);
+      drawStar(ctx, -52, -18, 7, '#fff7c8'); drawStar(ctx, 50, 16, 5, '#fff7c8');
+      ctx.restore();
+    }
+  }
+  function drawHeartC(x, y, r, full) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(r / 10, r / 10);
+    ctx.beginPath(); ctx.moveTo(0, 6); ctx.bezierCurveTo(-11, -2, -8, -11, 0, -5); ctx.bezierCurveTo(8, -11, 11, -2, 0, 6); ctx.closePath();
+    ctx.fillStyle = full ? C.coral : 'rgba(150,110,80,0.25)'; ctx.fill(); ctx.restore();
+  }
+  function speakerC(x, y, off, col) {
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(x - 9, y - 4); ctx.lineTo(x - 4, y - 4); ctx.lineTo(x + 2, y - 9); ctx.lineTo(x + 2, y + 9); ctx.lineTo(x - 4, y + 4); ctx.lineTo(x - 9, y + 4); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    if (off) { ctx.beginPath(); ctx.moveTo(x + 6, y - 5); ctx.lineTo(x + 12, y + 5); ctx.moveTo(x + 12, y - 5); ctx.lineTo(x + 6, y + 5); ctx.stroke(); }
+    else { ctx.beginPath(); ctx.arc(x + 3, y, 7, -0.8, 0.8); ctx.stroke(); }
   }
   function speaker(x, y, off) {
     ctx.fillStyle = C.cream;
@@ -828,20 +1006,22 @@
   }
   function drawRoom() {
     var L = LEVELS[S.level];
-    drawCover(L.room, 0, ROOM_Y, LW, ROOM_H);
-    // soft vignette at bottom of room
-    var g = ctx.createLinearGradient(0, PANEL_Y - 40, 0, PANEL_Y);
-    g.addColorStop(0, 'rgba(40,25,15,0)'); g.addColorStop(1, 'rgba(40,25,15,0.35)');
-    ctx.fillStyle = g; ctx.fillRect(0, PANEL_Y - 40, LW, 40);
+    if (imgReady('bg_' + L.room)) ctx.drawImage(IMG['bg_' + L.room], 0, 0, LW, LH);
+    else drawCover(L.room, 0, ROOM_Y, LW, ROOM_H);
+    drawAtmosphere();
     // items: blocked ones sit low, dark and grey; tappable ones glow, lift and breathe
     for (var i = 0; i < S.items.length; i++) {
       var it = S.items[i];
       if (it.state !== 'room') continue;
       var cov = it.cov;
+      if (it.hiddenBy && it.hiddenBy.state === 'room') { cov = true; }
       var sx = it.shake > 0 ? Math.sin(it.shake * 60) * 4 : 0;
       var sc = it.pop > 0 ? 1 + it.pop * 0.5 : 1;
       if (cov) {
+        ctx.save(); ctx.globalAlpha = 0.25; ctx.fillStyle = '#2b1a0e'; ctx.beginPath(); ctx.ellipse(it.x, it.y + it.size * 0.36, it.size * 0.38, it.size * 0.12, 0, 0, 6.3); ctx.fill(); ctx.restore();
+        if (it.hiddenBy && it.hiddenBy.state === "room") continue;
         drawSprite(it.sprite, it.x + sx, it.y + 4, it.size * 0.9, it.rot, true);
+        if (it.box) drawBoxBadge(it, true);
         continue;
       }
       var u = it.uncoverT > 0 ? it.uncoverT / 0.45 : 0; // 1 -> 0 while revealing
@@ -854,10 +1034,57 @@
       ctx.fill(); ctx.restore();
       if (u > 0) drawSprite(it.sprite, it.x + sx, yy, size, it.rot, true, u);
       drawGlow(it.sprite, it.x + sx, yy, size, it.rot, 1 - u * 0.85);
+      if (it.box) drawBoxBadge(it, false, yy);
+      if (it.cover) { ctx.save(); ctx.globalAlpha = 0.9; rr(it.x - 22, yy - it.size * 0.42 - 10, 44, 18, 9); ctx.fillStyle = 'rgba(58,38,24,0.8)'; ctx.fill(); text('盖着东西', it.x, yy - it.size * 0.42 - 1, 9.5, '#fff1d8', 'center', true); ctx.restore(); }
     }
   }
+  var BULBS = [[36,22],[55,23],[79,28],[100,22],[113,7],[134,11],[154,20],[175,23],[197,21],[221,11],[242,8],[262,19],[283,24],[303,23],[321,19],[340,8]];
+  var MOTES = []; for (var mi = 0; mi < 34; mi++) MOTES.push({ x: Math.random(), y: Math.random(), s: 0.6 + Math.random() * 1.6, p: Math.random() * 6.3, v: 0.2 + Math.random() * 0.5 });
+  function drawAtmosphere() {
+    ctx.save();
+    // sun rays from the window down to the rug
+    var AL = LEVELS[S.level], dxr = AL.rayDx;
+    var rays = dxr === null ? [] : [[118, 40, 150, 40, 70, 470, -10, 470], [150, 40, 175, 40, 150, 520, 85, 520], [178, 45, 205, 45, 250, 500, 175, 500]].map(function (r) { return r.map(function (v, j) { return j % 2 ? v : v + dxr; }); });
+    rays.forEach(function (r, i) {
+      var a = 0.13 + Math.sin(clock * 0.8 + i * 1.7) * 0.03;
+      var g = ctx.createLinearGradient(0, 40, 0, 520); g.addColorStop(0, 'rgba(255,236,180,' + a + ')'); g.addColorStop(1, 'rgba(255,236,180,0)');
+      ctx.beginPath(); ctx.moveTo(r[0], r[1]); ctx.lineTo(r[2], r[3]); ctx.lineTo(r[4], r[5]); ctx.lineTo(r[6], r[7]); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+    });
+    // fairy light glow
+    (AL.bulbs || BULBS).forEach(function (b, i) {
+      var tw = 0.55 + 0.45 * Math.sin(clock * 2.3 + i * 1.3);
+      var g = ctx.createRadialGradient(b[0], b[1], 0, b[0], b[1], 14);
+      g.addColorStop(0, 'rgba(255,226,150,' + (0.55 * tw) + ')'); g.addColorStop(1, 'rgba(255,226,150,0)');
+      ctx.fillStyle = g; ctx.fillRect(b[0] - 14, b[1] - 14, 28, 28);
+    });
+    // lamp glow
+    var lp = AL.lamp, lg = ctx.createRadialGradient(lp[0], lp[1], 0, lp[0], lp[1], 70); lg.addColorStop(0, lp[2]); lg.addColorStop(1, 'rgba(255,214,140,0)');
+    ctx.fillStyle = lg; ctx.fillRect(lp[0] - 70, lp[1] - 70, 140, 140);
+    // dust motes drifting in the light
+    MOTES.forEach(function (m) {
+      var x = 40 + ((m.x * 240 + Math.sin(clock * 0.4 + m.p) * 14) % 240), y = 60 + ((m.y * 440 + clock * m.v * 12) % 440);
+      var a = 0.25 + 0.5 * Math.max(0, Math.sin(clock * 1.5 + m.p));
+      ctx.beginPath(); ctx.arc(x, y, m.s, 0, 6.3); ctx.fillStyle = 'rgba(255,246,215,' + a + ')'; ctx.fill();
+    });
+    // sparkles
+    for (var k = 0; k < 5; k++) {
+      var t = (clock * 0.5 + k * 0.37) % 1, sx = [70, 300, 210, 340, 40][k], sy = [140, 160, 60, 300, 260][k];
+      var sz = Math.sin(t * Math.PI) * 5;
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(0.785); ctx.fillStyle = 'rgba(255,250,225,' + (Math.sin(t * Math.PI) * 0.9) + ')';
+      ctx.fillRect(-sz, -0.8, sz * 2, 1.6); ctx.fillRect(-0.8, -sz, 1.6, sz * 2); ctx.restore();
+    }
+    ctx.restore();
+  }
+  function drawBoxBadge(it, cov, yy) {
+    var y = (yy || it.y) - it.size * 0.1;
+    ctx.save(); ctx.globalAlpha = cov ? 0.6 : 1;
+    ctx.beginPath(); ctx.arc(it.x + it.size * 0.34, y - it.size * 0.3, 11, 0, 6.3); ctx.fillStyle = '#e26d5c'; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+    text('×2', it.x + it.size * 0.34, y - it.size * 0.3 + 0.5, 10, '#fff', 'center', true);
+    ctx.restore();
+  }
   function drawBaskets() {
-    for (var b = 0; b < 2; b++) {
+    for (var b = 0; b < 3; b++) {
       var B = S.baskets[b], R = BASKETS[b];
       if (!B) {
         rr(R.x + 6, R.y + 10, R.w - 12, R.h - 10, 14); ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fill();
@@ -871,33 +1098,37 @@
       ctx.translate(R.x + R.w / 2, R.y + R.h / 2 + oy); ctx.scale(sc, sc); ctx.translate(-(R.x + R.w / 2), -(R.y + R.h / 2));
       // label tag
       var cat = CATS[B.cat], pinkCat = B.cat === 'pink';
-      rr(R.x + 22, R.y - 26, R.w - 44, 23, 11.5); ctx.fillStyle = pinkCat ? '#f3d2cf' : C.cream; ctx.fill();
-      fitText(cat.name, R.x + R.w / 2, R.y - 14.5, R.w - 56, 14, pinkCat ? '#b9503f' : C.ink, true);
+      ctx.strokeStyle = 'rgba(120,85,50,0.7)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(R.x + R.w / 2 - 30, R.y + 20); ctx.lineTo(R.x + R.w / 2 - 16, R.y - 4); ctx.stroke();
+      paper(R.x + R.w / 2 - 44, R.y - 30, 88, 24, 5, (b - 1) * 0.035);
+      if (pinkCat) { rr(R.x + R.w / 2 - 44, R.y - 30, 88, 24, 5); ctx.fillStyle = 'rgba(231,163,160,0.35)'; ctx.fill(); }
+      fitText(cat.name, R.x + R.w / 2, R.y - 18, 70, 13, pinkCat ? '#b9503f' : C.ink, true);
+      sticker(R.x + R.w / 2 + 40, R.y - 30, ['heart', 'star', 'flower'][(b + B.cat.length) % 3], 7);
       // items inside (behind front of basket)
-      B.filled.forEach(function (it, k) { var p = basketSlot(b, k); drawSprite(it.sprite, p.x, p.y, 44, (k - 1) * 0.18); });
+      B.filled.forEach(function (it, k) { var p = basketSlot(b, k); drawSprite(it.sprite, p.x, p.y, 36, (k - 1) * 0.2); });
+      ctx.save(); ctx.fillStyle = 'rgba(40,20,8,0.28)'; ctx.beginPath(); ctx.ellipse(R.x + R.w / 2, R.y + 63, R.w * 0.46, 5, 0, 0, 6.3); ctx.fill(); ctx.restore();
       if (imgReady('basket')) ctx.drawImage(IMG.basket, R.x, R.y + 12, R.w, R.w * IMG.basket.naturalHeight / IMG.basket.naturalWidth);
       // progress dots
       for (var k = 0; k < 3; k++) {
-        ctx.beginPath(); ctx.arc(R.x + R.w / 2 + (k - 1) * 16, R.y + R.h + 2, 4.5, 0, 6.3);
-        ctx.fillStyle = k < B.filled.length ? C.goldLite : 'rgba(255,240,220,0.35)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(R.x + R.w / 2 + (k - 1) * 12, R.y + 48, 3.6, 0, 6.3);
+        ctx.fillStyle = k < B.filled.length ? C.goldLite : 'rgba(80,50,25,0.45)'; ctx.fill();
       }
       ctx.restore();
     }
   }
   function drawShelf() {
-    // slots
-    for (var i = 0; i < SHELF_N; i++) {
-      var s = shelfSlot(i);
-      rr(s.x - 30, s.y - 28, 60, 54, 12); ctx.fillStyle = 'rgba(30,16,6,0.22)'; ctx.fill();
-    }
-    if (imgReady('shelf')) ctx.drawImage(IMG.shelf, 10, SHELF_Y - 6, LW - 20, (LW - 20) * IMG.shelf.naturalHeight / IMG.shelf.naturalWidth);
     S.shelf.forEach(function (it) {
       if (it.state !== 'shelf') return;
       var p = shelfPos(it);
-      drawSprite(it.sprite, p.x, p.y, 50, 0);
+      drawSprite(it.sprite, p.x, p.y + 4, 46, 0);
     });
-    var full = S.shelf.length >= SHELF_N - 1;
-    text('暂存架 ' + S.shelf.length + '/' + SHELF_N, LW / 2, SHELF_Y + 20, 12, full ? '#ffb4a8' : 'rgba(255,240,220,0.75)', 'center', true);
+    var full = S.shelf.length >= slots() - 1;
+    if (slots() < 5) { // sealed 5th cubby
+      ctx.save(); ctx.translate(CUBBY_X[4], CUBBY_Y); ctx.fillStyle = 'rgba(40,22,10,0.35)'; ctx.fillRect(-32, -30, 64, 60);
+      [-0.5, 0.5].forEach(function (r) { ctx.save(); ctx.rotate(r); rr(-38, -8, 76, 16, 2); ctx.fillStyle = '#d9b27a'; ctx.fill(); ctx.restore(); });
+      text('封', 0, 1, 12, '#7a4a20', 'center', true); ctx.restore();
+    }
+    text('暂存 ' + S.shelf.length + '/' + slots() + (full ? '  快满了！' : ''), LW / 2, 776, 10, full ? '#ffcfb8' : 'rgba(255,240,215,0.8)', 'center', true);
   }
   function drawFlights() {
     S.flights.forEach(function (f) {
@@ -929,17 +1160,39 @@
     ctx.save(); ctx.globalAlpha = a;
     ctx.font = font(15, true);
     var w = Math.min(340, ctx.measureText(S.toast).width + 36);
-    rr(LW / 2 - w / 2, PANEL_Y - 54, w, 36, 18); ctx.fillStyle = 'rgba(58,38,24,0.86)'; ctx.fill();
-    text(S.toast, LW / 2, PANEL_Y - 36, 15, C.cream);
+    rr(LW / 2 - w / 2, 566, w, 32, 16); ctx.fillStyle = 'rgba(58,38,24,0.82)'; ctx.fill();
+    text(S.toast, LW / 2, 582, 14, C.cream);
     ctx.restore();
   }
+  function toolBtn(cx, cy, icon, label, count) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(40,20,8,0.45)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, 21, 0, 6.3); var g = ctx.createLinearGradient(0, cy - 21, 0, cy + 21); g.addColorStop(0, '#c99560'); g.addColorStop(1, '#8a5a33'); ctx.fillStyle = g; ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.beginPath(); ctx.arc(cx, cy, 17, 0, 6.3); ctx.fillStyle = '#f6ead1'; ctx.fill();
+    if (IMG[icon]) drawSprite(icon, cx, cy, 24, -0.2);
+    else { ctx.strokeStyle = C.ink; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      if (icon === 'shuffle') { ctx.beginPath(); ctx.moveTo(cx - 9, cy - 5); ctx.bezierCurveTo(cx - 2, cy - 5, cx + 2, cy + 5, cx + 9, cy + 5); ctx.moveTo(cx - 9, cy + 5); ctx.bezierCurveTo(cx - 2, cy + 5, cx + 2, cy - 5, cx + 9, cy - 5); ctx.moveTo(cx + 5, cy - 9); ctx.lineTo(cx + 9, cy - 5); ctx.lineTo(cx + 5, cy - 1); ctx.moveTo(cx + 5, cy + 1); ctx.lineTo(cx + 9, cy + 5); ctx.lineTo(cx + 5, cy + 9); ctx.stroke(); }
+      else if (icon === 'undo') { ctx.beginPath(); ctx.arc(cx + 1, cy + 2, 7, -2.6, 1.6); ctx.moveTo(cx - 8, cy - 7); ctx.lineTo(cx - 6, cy - 1); ctx.lineTo(cx, cy - 3); ctx.stroke(); }
+      else if (icon === 'broom') { ctx.beginPath(); ctx.moveTo(cx + 7, cy - 9); ctx.lineTo(cx - 1, cy + 1); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx - 1, cy - 1); ctx.lineTo(cx + 3, cy + 3); ctx.lineTo(cx - 3, cy + 10); ctx.lineTo(cx - 10, cy + 4); ctx.closePath(); ctx.fillStyle = '#e2b54d'; ctx.fill(); ctx.stroke(); } }
+    ctx.beginPath(); ctx.arc(cx + 15, cy - 15, 8, 0, 6.3); ctx.fillStyle = count ? C.coral : '#a99a86'; ctx.fill();
+    text(String(count), cx + 15, cy - 14.5, 10, '#fff', 'center', true);
+    ctx.restore();
+    text(label, cx, cy + 29, 9.5, '#fff1d8', 'center', true);
+  }
   function drawBottomBar() {
-    var used = S.toolUsed;
-    button(UI.tool, 'tool', used ? '整理一下（已用）' : '整理一下 ×1', C.sage, C.sageDark, 16, used);
-    var b = UI.info;
-    rr(b.x, b.y, b.w, b.h, 23); ctx.fillStyle = 'rgba(30,16,6,0.3)'; ctx.fill();
-    text('用时 ' + fmtTime(S.time), b.x + 46, b.y + b.h / 2, 14, C.cream, 'center', true);
-    text('得分 ' + S.score, b.x + 122, b.y + b.h / 2, 14, C.goldLite, 'center', true);
+    for (var ti = 0; ti < 4; ti++) { var k = TOOL_KEYS[ti], ps = pressScale('tool' + ti); ctx.save(); ctx.translate(36 + ti * 52, 804); ctx.scale(ps, ps); toolBtn(0, 0, k, TOOL_NAMES[k], PROG.tools[k] || 0); ctx.restore(); }
+    var L = LEVELS[S.level], x = 222, y = 788, w = 158, h = 44;
+    paper(x, y, w, h, 8, 0.015);
+    sticker(x + w - 4, y + 2, 'star', 6);
+    var left = Math.max(0, L.limit - S.time), urgent = left < 20;
+    var pulse = urgent ? 1 + Math.sin(clock * 10) * 0.08 : 1;
+    drawSprite('hourglass', x + 17, y + h / 2, 20, Math.sin(clock * 3) * 0.12);
+    ctx.save(); ctx.translate(x + 50, y + h / 2); ctx.scale(pulse, pulse);
+    text(fmtTime(left), 0, 0, 17, urgent ? C.coralDark : C.ink, 'center', true); ctx.restore();
+    ctx.fillStyle = 'rgba(120,85,55,0.25)'; ctx.fillRect(x + 78, y + 9, 1.5, h - 18);
+    text('得分', x + 98, y + h / 2, 11, C.inkSoft, 'center', true);
+    text(String(S.score), x + 132, y + h / 2, 17, C.coralDark, 'center', true);
   }
   function drawOverlay() {
     if (!S.overlay) return;
@@ -950,25 +1203,16 @@
     rr(40, y0, 310, 300, 22); ctx.fillStyle = C.cream; ctx.fill();
     var L = LEVELS[S.level];
     if (imgReady(L.owner)) { var im = IMG[L.owner], h = 120, w = im.naturalWidth * h / im.naturalHeight; ctx.drawImage(im, LW / 2 - w / 2, y0 - 70, w, h); }
-    if (S.overlay === 'fail') {
-      text('暂存架满啦！', LW / 2, y0 + 82, 26, C.coralDark);
-      text('失去 1 颗心，还剩 ' + S.lives + ' 颗', LW / 2, y0 + 122, 16, C.inkSoft);
-      text('小窍门：先收能直接放进篮子的', LW / 2, y0 + 156, 14, C.inkSoft, 'center', false);
-      text('暂存架留出空位更安全', LW / 2, y0 + 178, 14, C.inkSoft, 'center', false);
-      button(UI.ovBtn, 'ov', '再收一次', C.sage, C.sageDark, 19);
-    } else {
-      text('今天先躺平～', LW / 2, y0 + 82, 26, C.coralDark);
-      text('3 颗心都用完啦', LW / 2, y0 + 122, 16, C.inkSoft);
-      text('休息一下，回来心会补满', LW / 2, y0 + 160, 14, C.inkSoft, 'center', false);
-      button(UI.ovBtn, 'ov', '休息好了，再来', C.coral, C.coralDark, 18);
-    }
+    text('今天先躺平～', LW / 2, y0 + 82, 26, C.coralDark);
+    text(S.overlay === 'timeout' ? '时间到啦，房间还没收完' : '暂存格满啦，放不下了', LW / 2, y0 + 122, 16, C.inkSoft);
+    text('小窍门：先拿能直接进篮子的，', LW / 2, y0 + 156, 14, C.inkSoft, 'center', false);
+    text('纸箱拆开不占格子', LW / 2, y0 + 178, 14, C.inkSoft, 'center', false);
+    button(UI.ovBtn, 'ov', '重新收拾这间', C.coral, C.coralDark, 18);
     ctx.restore();
   }
   function drawPlay() {
     drawRoom();
     drawHUD();
-    woodPanel(PANEL_Y, LH - PANEL_Y);
-    ctx.fillStyle = 'rgba(30,16,6,0.35)'; ctx.fillRect(0, PANEL_Y, LW, 4);
     drawShelf();
     drawBaskets();
     drawBottomBar();
@@ -1043,7 +1287,7 @@
     rr(cx, cy, cw, ch, 14); ctx.fillStyle = C.cream; ctx.fill(); ctx.restore();
     if (S.card) { ctx.save(); rr(cx, cy, cw, ch, 14); ctx.clip(); ctx.drawImage(S.card, cx, cy, cw, ch); ctx.restore(); }
     text(R.final ? '三间小窝全部收好啦！' : '这一间收拾好啦！', LW / 2, 524, 20, C.goldLite);
-    var sub = '时间奖励 +' + R.timeBonus + ' · 空位奖励 +' + R.shelfBonus;
+    var sub = '时间奖励 +' + R.timeBonus + ' · 空位奖励 +' + R.shelfBonus + (R.gift && R.gift.length ? ' · 新道具：' + R.gift.join('、') : '');
     text(sub, LW / 2, 550, 12.5, 'rgba(255,240,220,0.8)', 'center', false);
     button(UI.save, 'save', '保存对比图', C.coral, C.coralDark, 17);
     button(UI.next, 'next', R.final ? '从头再收一遍' : '下一间 →', C.sage, C.sageDark, 17);
@@ -1064,7 +1308,7 @@
   document.addEventListener('visibilitychange', function () { S.paused = document.hidden; last = 0; });
 
   // ---------- main loop ----------
-  var last = 0, clock = 0;
+  var last = 0, clock = 0, marginCache = {};
   function frame(ts) {
     var dt = last ? Math.min(0.05, (ts - last) / 1000) : 0.016;
     last = ts;
@@ -1073,7 +1317,17 @@
     if (S.screen === 'loading' && loaded >= toLoad.length) S.screen = 'start';
     update(dt);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = '#3a2a1f'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#6a4a2e'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (S.screen === 'play' && (offX > 1 || offY > 1)) {
+      var bgn = 'bg_' + LEVELS[S.level].room;
+      if (imgReady(bgn)) {
+        if (!marginCache[bgn]) { var mc = document.createElement('canvas'); mc.width = 24; mc.height = 52; mc.getContext('2d').drawImage(IMG[bgn], 0, 0, 24, 52); marginCache[bgn] = mc; }
+        var cs = Math.max(canvas.width / 24, canvas.height / 52);
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(marginCache[bgn], (canvas.width - 24 * cs) / 2, (canvas.height - 52 * cs) / 2, 24 * cs, 52 * cs);
+        ctx.fillStyle = 'rgba(60,38,20,0.35)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
     ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * offX, dpr * offY);
     ctx.save(); ctx.beginPath(); ctx.rect(0, 0, LW, LH); ctx.clip();
     if (S.screen === 'loading') {
@@ -1093,18 +1347,25 @@
   if (debug) {
     window.__td = {
       S: S, LEVELS: LEVELS, BASKETS: BASKETS, UI: UI, PROG: function () { return PROG; },
-      startLevel: function (i) { S.lives = MAX_LIVES; S.failedThisLevel = false; startLevel(i); },
-      tap: onTap, tapItem: tapItem, isCovered: isCovered, freeItems: freeItems,
+      startLevel: function (i) { startLevel(i); },
+      tap: onTap, tapItem: tapItem, buildLevel: buildLevel,
+      sim: function (li, g, nz) { return simulate(li, g, nz); },
+      mockSpecials: function () {
+        var spare = S.items.filter(function (i) { return i.state === 'room' && !i.cov && !i.box && !i.cover; });
+        S.combo = 4; S.comboShow = 2; S.freezeCombo = true;
+      }, isCovered: isCovered, freeItems: freeItems,
       // auto-play helper: tap the best free item (matching basket first)
       smartStep: function () {
         var fr = freeItems(); if (!fr.length) return false;
-        for (var i = 0; i < fr.length; i++) for (var b = 0; b < 2; b++) if (basketAccepts(S.baskets[b], fr[i].cat)) { tapItem(fr[i]); return 'basket'; }
-        tapItem(fr[0]); return 'shelf';
+        for (var i = 0; i < fr.length; i++) for (var b = 0; b < 3; b++) if (basketAccepts(S.baskets[b], fr[i].cat)) { tapItem(fr[i]); return 'basket'; }
+        for (var j = 0; j < fr.length; j++) if (fr[j].box) { tapItem(fr[j]); return 'box'; }
+        var best = fr[0], bs = 1e9; fr.forEach(function (it) { var q = S.queue.indexOf(it.cat); q = q < 0 ? 99 : q; if (q < bs) { bs = q; best = it; } });
+        tapItem(best); return 'shelf';
       },
       badStep: function () {
         var fr = freeItems();
         for (var i = 0; i < fr.length; i++) {
-          var ok = true; for (var b = 0; b < 2; b++) if (S.baskets[b] && S.baskets[b].cat === fr[i].cat) ok = false;
+          var ok = true; for (var b = 0; b < 3; b++) if (S.baskets[b] && S.baskets[b].cat === fr[i].cat) ok = false;
           for (var q = 0; q < S.queue.length && q < 1; q++) if (S.queue[q] === fr[i].cat) ok = false;
           if (ok) { tapItem(fr[i]); return true; }
         }
