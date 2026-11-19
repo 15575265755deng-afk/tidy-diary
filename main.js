@@ -3,7 +3,7 @@
 
   // ---------- constants ----------
   var LW = 390, LH = 844;
-  var MAX_LIVES = 3, SHELF_N = 5;
+  var SHELF_N = 5;
   function slots() { return LEVELS[S.level].slots || 5; }
   var ROOM_Y = 0, ROOM_H = 520;
   var PANEL_Y = 604;
@@ -275,7 +275,7 @@
 
   // ---------- state ----------
   var S = {
-    screen: 'loading', level: 0, lives: MAX_LIVES, items: [], queue: [], baskets: [null, null, null],
+    screen: 'loading', level: 0, items: [], queue: [], baskets: [null, null, null],
     shelf: [], flights: [], fx: [], score: 0, combo: 0, lastDone: -99, time: 0,
     toolUsed: false, failedThisLevel: false, overlay: null, overlayT: 0, toast: '', toastT: 0,
     btnPress: {}, beforeCanvas: null, card: null, result: null, resultT: 0, startT: 0, endingT: -1, paused: false
